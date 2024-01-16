@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+// Packages are used to avoid name collisions
+package Twitter;
+
+service Wall {
+    rpc SaveTweet(Tweet) returns (Tweet) {}
+    rpc GetTweets(noParams) returns (Tweets) {}
+    rpc GetTweetsStream(noParams) returns (stream Tweet) {}
+}
+
+service Profile {
+    rpc ChangeProfilePicture(stream PhotoBytes) returns (noParams) {}
+}
+
+// rpc method requires at least one parameter
+message noParams {}
+
+message Tweet {
+    string id = 1;
+    string text = 2;
+    string author = 3;
+}
+
+message Tweets {
+    repeated Tweet tweets = 1;
+}
+
+message PhotoBytes {
+    bytes photo_data = 1;
+}
