@@ -1,4 +1,4 @@
-## Basic gRPC twitter
+## Basic gRPC Client-Server application
 
 ### Doc
 
