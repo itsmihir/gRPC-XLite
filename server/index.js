@@ -1,6 +1,5 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
-const { text } = require('stream/consumers');
 
 // load the proto file
 const packageDefinition = protoLoader.loadSync('server/server.proto');
@@ -39,6 +38,7 @@ function SaveTweet(call, callback) {
         text: call.request.text,
         author: call.request.author
     })
+    // if we don't call the callback, the client will be waiting forever
     callback(null, tweets[tweets.length - 1])
 }
 
@@ -61,4 +61,18 @@ function GetTweetsStream(call, callback) {
 
 function ChangeProfilePicture(call, callback) {
     console.log("Changing profile picture ...")
+    const imageBuffer = [];
+
+    call.on('data', function(data) {
+        console.log(data.photoData);
+        imageBuffer.push(data.photoData);
+    });
+
+    call.on('end', function() {
+        callback(null);
+        // convert the imageBuffer into a file
+        const fs = require('fs');
+        const stream = fs.createWriteStream('server/profilePhoto/profile.jpg');
+        stream.write(Buffer.concat(imageBuffer));
+    })
 }

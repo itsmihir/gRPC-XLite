@@ -47,3 +47,32 @@ if(command === 'getStream') {
         console.log('stream ended');
     })
 }
+
+// we need to create a new stub for the Profile service
+const ProfileStub = new Profile('localhost:40000', grpc.credentials.createInsecure());
+
+if(command === 'uploadPhoto') {
+    const file = process.argv[3];
+    const call = ProfileStub.ChangeProfilePicture(function(err) {
+        if(err) {
+            console.log(err);
+        }
+    })
+    // convert the file into a stream
+    const fs = require('fs');
+    const stream = fs.createReadStream(file);
+
+    stream.on('data', function(chunk) {
+        console.log("sending chunk to server ...");
+        call.write({
+            // note that we have photo_data in the proto file but here we use photoData
+            // this is because the proto file is converted to camelCase
+            photoData: chunk
+        });    
+    });
+
+    stream.on('end', function() {
+        console.log("No more data to send")
+        call.end();
+    })
+}
